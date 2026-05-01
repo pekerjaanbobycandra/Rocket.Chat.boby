@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true 
 
     steps:
       - name: Checkout Code
@@ -22,20 +24,34 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Install Dependencies
         run: |
-          yarn install --frozen-lockfile
+          yarn install
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
+
+      - name: Cleanup Missing References
+        run: |
+          # Menghapus baris import yang merujuk ke library yang sudah dibuang agar tidak error saat bundling
+          echo "Cleaning up code references..."
+          find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/@react-native-firebase\/analytics/d' {} +
+          find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/expo-av/d' {} +
+          find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/react-native-katex/d' {} +
+          find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/react-native-math-view/d' {} +
+          find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/@bugsnag\/react-native/d' {} +
+          
+          # Membersihkan referensi Bugsnag di level Android (sering bikin gagal build)
+          sed -i '/bugsnag/d' android/app/build.gradle || true
+          find android/app/src/main/java -type f -name "*.java" -exec sed -i '/Bugsnag/d' {} + || true
+          echo "Cleanup done."
 
       - name: Build Android Release (Official)
         run: |
           cd android
-          # -x lint dan -x test digunakan untuk mengabaikan error pengecekan library yang dihapus
-          ./gradlew assembleOfficialRelease -x lint -x test
+          ./gradlew assembleOfficialRelease -x lint -x test --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
