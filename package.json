@@ -1,6 +1,6 @@
 {
-	"name": "rocket-chat-reactnative",
-	"version": "4.72.0",
+	"name": "desa-cluring-app",
+	"version": "1.0.0",
 	"private": true,
 	"packageManager": "yarn@1.22.22",
 	"scripts": {
@@ -24,7 +24,6 @@
 		"bugsnag:upload-android": "bugsnag-cli upload react-native-android"
 	},
 	"dependencies": {
-		"@bugsnag/react-native": "8.4.0",
 		"@expo/vector-icons": "^15.0.3",
 		"@hookform/resolvers": "^2.9.10",
 		"@lodev09/react-native-true-sheet": "~3.7.0",
@@ -37,7 +36,6 @@
 		"@react-native-community/netinfo": "^11.3.1",
 		"@react-native-community/slider": "5.0.1",
 		"@react-native-cookies/cookies": "6.2.1",
-		"@react-native-firebase/analytics": "^21.12.2",
 		"@react-native-firebase/app": "^21.12.2",
 		"@react-native-firebase/crashlytics": "^21.12.2",
 		"@react-native-masked-view/masked-view": "^0.3.1",
@@ -60,7 +58,6 @@
 		"eslint-import-resolver-typescript": "^4.4.4",
 		"expo": "^54.0.0",
 		"expo-apple-authentication": "~8.0.8",
-		"expo-av": "~16.0.8",
 		"expo-camera": "~17.0.10",
 		"expo-device": "^8.0.10",
 		"expo-document-picker": "~14.0.8",
@@ -99,11 +96,9 @@
 		"react-native-file-viewer": "2.1.4",
 		"react-native-gesture-handler": "~2.28.0",
 		"react-native-image-crop-picker": "RocketChat/react-native-image-crop-picker#f028aac24373d05166747ef6d9e59bb037fe3224",
-		"react-native-katex": "git+https://github.com/RocketChat/react-native-katex.git",
 		"react-native-keyboard-controller": "1.18.5",
 		"react-native-linear-gradient": "2.6.2",
 		"react-native-localize": "2.1.1",
-		"react-native-math-view": "3.9.5",
 		"react-native-mime-types": "2.3.0",
 		"react-native-mmkv": "3.3.3",
 		"react-native-modal": "13.0.1",
