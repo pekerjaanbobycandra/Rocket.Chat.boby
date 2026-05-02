@@ -35,9 +35,10 @@ jobs:
 
       - name: Cleanup Missing References
         run: |
-          echo "Cleaning up all Bugsnag references..."
+          echo "Cleaning up all Bugsnag and missing library references..."
           
-          # 1. Hapus referensi Bugsnag di file Manifest (Penyebab error Manifest merger)
+          # 1. Hapus referensi Bugsnag di SEMUA file Manifest (Termasuk folder official)
+          # Ini untuk memperbaiki error: Attribute meta-data#com.bugsnag.android.API_KEY
           find android -name "AndroidManifest.xml" -exec sed -i '/com.bugsnag/d' {} +
           
           # 2. Hapus referensi di JavaScript/TypeScript (Frontend)
@@ -58,14 +59,14 @@ jobs:
 
       - name: Verify Cleanup
         run: |
-          echo "Checking for remaining Bugsnag strings in critical files..."
-          # Mencari kata bugsnag, jika tidak muncul (Clean!) berarti sudah aman
-          grep -ri "bugsnag" android/app/src/main/AndroidManifest.xml || echo "Manifest is Clean!"
-          grep -ri "bugsnag" android/app/src/main/java || echo "Source code is Clean!"
+          echo "Verifying if Bugsnag is still in the Official Manifest..."
+          # Jika hasilnya kosong, berarti sudah benar-benar terhapus
+          grep -ri "bugsnag" android/app/src/official/AndroidManifest.xml || echo "Official Manifest is Clean!"
 
       - name: Build Android Release (Official)
         run: |
           cd android
+          # Menggunakan satu tanda pipe (|) agar tidak error syntax YAML
           ./gradlew assembleOfficialRelease -x lint -x test --no-daemon --stacktrace
 
       - name: Upload APK
