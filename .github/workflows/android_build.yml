@@ -37,33 +37,30 @@ jobs:
         run: |
           echo "Bypassing Bugsnag API Key validation..."
           
-          # 1. Menipu sistem dengan mengisi nilai dummy pada placeholder Bugsnag
-          # Ini langsung menyasar penyebab utama error: "requires a placeholder substitution"
           find android -name "AndroidManifest.xml" -exec sed -i 's/${BugsnagAPIKey}/kunci_kosong/g' {} +
           
-          # 2. Hapus referensi di JavaScript/TypeScript (Frontend)
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/@react-native-firebase\/analytics/d' {} +
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/expo-av/d' {} +
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/react-native-katex/d' {} +
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/react-native-math-view/d' {} +
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/@bugsnag\/react-native/d' {} +
           
-          # 3. Hapus Bugsnag di level Android (File Java & Kotlin)
           find android/app/src/main/java -type f \( -name "*.java" -o -name "*.kt" \) -exec sed -i '/bugsnag/Id' {} + || true
           
-          # 4. Hapus Bugsnag dari file konfigurasi Gradle
           sed -i '/bugsnag/Id' android/app/build.gradle || true
           sed -i '/bugsnag/Id' android/build.gradle || true
           
           echo "Bypass and Cleanup done."
 
-      - name: Build Android Release (Official)
+      # UBAH BAGIAN INI: Menggunakan "assembleOfficialDebug" agar tidak minta sertifikat
+      - name: Build Android Debug (Internal)
         run: |
           cd android
-          ./gradlew assembleOfficialRelease -x lint -x test --no-daemon --stacktrace
+          ./gradlew assembleOfficialDebug -x lint -x test --no-daemon --stacktrace
 
+      # UBAH BAGIAN INI: Path download disesuaikan ke folder debug
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Desa-Cluring-APK
-          path: android/app/build/outputs/apk/official/release/*.apk
+          path: android/app/build/outputs/apk/official/debug/*.apk
