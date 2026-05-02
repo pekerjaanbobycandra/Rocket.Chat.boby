@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "Cleaning up all Bugsnag references..."
           
-          # 1. Hapus referensi Bugsnag di file Manifest (Penyebab error terakhir)
+          # 1. Hapus referensi Bugsnag di file Manifest (Penyebab error Manifest merger)
           find android -name "AndroidManifest.xml" -exec sed -i '/com.bugsnag/d' {} +
           
           # 2. Hapus referensi di JavaScript/TypeScript (Frontend)
@@ -56,8 +56,15 @@ jobs:
           
           echo "Cleanup done."
 
+      - name: Verify Cleanup
+        run: |
+          echo "Checking for remaining Bugsnag strings in critical files..."
+          # Mencari kata bugsnag, jika tidak muncul (Clean!) berarti sudah aman
+          grep -ri "bugsnag" android/app/src/main/AndroidManifest.xml || echo "Manifest is Clean!"
+          grep -ri "bugsnag" android/app/src/main/java || echo "Source code is Clean!"
+
       - name: Build Android Release (Official)
-        run: | |
+        run: |
           cd android
           ./gradlew assembleOfficialRelease -x lint -x test --no-daemon --stacktrace
 
