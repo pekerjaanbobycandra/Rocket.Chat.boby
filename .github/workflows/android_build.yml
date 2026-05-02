@@ -35,28 +35,30 @@ jobs:
 
       - name: Cleanup Missing References
         run: |
-          echo "Cleaning up code references..."
-          # 1. Hapus referensi di JavaScript/TypeScript (Frontend)
+          echo "Cleaning up all Bugsnag references..."
+          
+          # 1. Hapus referensi Bugsnag di file Manifest (Penyebab error terakhir)
+          find android -name "AndroidManifest.xml" -exec sed -i '/com.bugsnag/d' {} +
+          
+          # 2. Hapus referensi di JavaScript/TypeScript (Frontend)
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/@react-native-firebase\/analytics/d' {} +
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/expo-av/d' {} +
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/react-native-katex/d' {} +
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/react-native-math-view/d' {} +
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/@bugsnag\/react-native/d' {} +
           
-          # 2. Hapus Bugsnag di level Android (File Java & Kotlin)
-          # Perintah ini sekarang menyisir file .java DAN .kt
+          # 3. Hapus Bugsnag di level Android (File Java & Kotlin)
           find android/app/src/main/java -type f \( -name "*.java" -o -name "*.kt" \) -exec sed -i '/bugsnag/Id' {} + || true
           
-          # 3. Hapus Bugsnag dari file konfigurasi Gradle
+          # 4. Hapus Bugsnag dari file konfigurasi Gradle
           sed -i '/bugsnag/Id' android/app/build.gradle || true
           sed -i '/bugsnag/Id' android/build.gradle || true
           
           echo "Cleanup done."
 
       - name: Build Android Release (Official)
-        run: |
+        run: | |
           cd android
-          # Tambahkan --stacktrace agar jika error kita bisa lihat lebih detail
           ./gradlew assembleOfficialRelease -x lint -x test --no-daemon --stacktrace
 
       - name: Upload APK
