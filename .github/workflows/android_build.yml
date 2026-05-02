@@ -33,13 +33,13 @@ jobs:
         env:
           NODE_OPTIONS: "--max-old-space-size=4096"
 
-      - name: Cleanup Missing References
+      - name: Bypass Manifest Validation & Cleanup
         run: |
-          echo "Cleaning up all Bugsnag and missing library references..."
+          echo "Bypassing Bugsnag API Key validation..."
           
-          # 1. Hapus referensi Bugsnag di SEMUA file Manifest (Termasuk folder official)
-          # Ini untuk memperbaiki error: Attribute meta-data#com.bugsnag.android.API_KEY
-          find android -name "AndroidManifest.xml" -exec sed -i '/com.bugsnag/d' {} +
+          # 1. Menipu sistem dengan mengisi nilai dummy pada placeholder Bugsnag
+          # Ini langsung menyasar penyebab utama error: "requires a placeholder substitution"
+          find android -name "AndroidManifest.xml" -exec sed -i 's/${BugsnagAPIKey}/kunci_kosong/g' {} +
           
           # 2. Hapus referensi di JavaScript/TypeScript (Frontend)
           find app -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" \) -exec sed -i '/@react-native-firebase\/analytics/d' {} +
@@ -55,18 +55,11 @@ jobs:
           sed -i '/bugsnag/Id' android/app/build.gradle || true
           sed -i '/bugsnag/Id' android/build.gradle || true
           
-          echo "Cleanup done."
-
-      - name: Verify Cleanup
-        run: |
-          echo "Verifying if Bugsnag is still in the Official Manifest..."
-          # Jika hasilnya kosong, berarti sudah benar-benar terhapus
-          grep -ri "bugsnag" android/app/src/official/AndroidManifest.xml || echo "Official Manifest is Clean!"
+          echo "Bypass and Cleanup done."
 
       - name: Build Android Release (Official)
         run: |
           cd android
-          # Menggunakan satu tanda pipe (|) agar tidak error syntax YAML
           ./gradlew assembleOfficialRelease -x lint -x test --no-daemon --stacktrace
 
       - name: Upload APK
