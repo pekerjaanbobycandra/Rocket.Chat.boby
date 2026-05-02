@@ -52,15 +52,25 @@ jobs:
           
           echo "Bypass and Cleanup done."
 
-      # UBAH BAGIAN INI: Menggunakan "assembleOfficialDebug" agar tidak minta sertifikat
-      - name: Build Android Debug (Internal)
+      - name: Generate Dummy Keystore & Build Release
         run: |
-          cd android
-          ./gradlew assembleOfficialDebug -x lint -x test --no-daemon --stacktrace
+          echo "Generating dummy Keystore..."
+          cd android/app
+          # Membuat sertifikat "palsu" agar sistem Android mengizinkan pembuatan versi Release
+          keytool -genkey -v -keystore dummy.keystore -alias cluring -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Desa Cluring, C=ID" -storepass rahasia123 -keypass rahasia123
+          cd ..
+          
+          echo "Building Release APK with dummy Keystore..."
+          # Membangun versi Release dan menyuntikkan sertifikat palsu tadi
+          ./gradlew assembleOfficialRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/app/dummy.keystore \
+            -Pandroid.injected.signing.store.password=rahasia123 \
+            -Pandroid.injected.signing.key.alias=cluring \
+            -Pandroid.injected.signing.key.password=rahasia123 \
+            -x lint -x test --no-daemon --stacktrace
 
-      # UBAH BAGIAN INI: Path download disesuaikan ke folder debug
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Desa-Cluring-APK
-          path: android/app/build/outputs/apk/official/debug/*.apk
+          path: android/app/build/outputs/apk/official/release/*.apk
